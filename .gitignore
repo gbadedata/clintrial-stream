@@ -1,0 +1,122 @@
+# === Secrets and credentials ===
+# Never commit anything that could grant access to AWS, databases, or APIs
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.pfx
+*.p12
+aws-credentials
+aws-config
+
+# === Terraform ===
+# State files contain ALL infrastructure including plaintext secrets
+*.tfstate
+*.tfstate.*
+*.tfstate.backup
+*.tfvars
+!*.tfvars.example
+.terraform/
+.terraform.lock.hcl
+crash.log
+crash.*.log
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+.terraformrc
+terraform.rc
+
+# === Python ===
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+env/
+.python-version-temp
+
+# Testing and coverage
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.cache/
+
+# Type checkers
+.mypy_cache/
+.ruff_cache/
+.pyre/
+.pytype/
+
+# === Docker ===
+.docker/
+
+# === IDEs and editors ===
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.pydevproject
+.settings/
+
+# === OS ===
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# === Logs and runtime ===
+*.log
+logs/
+*.pid
+*.seed
+*.pid.lock
+
+# === Local artifacts (this project) ===
+local-state/
+.local/
+*.local
+demo-output/
+.lambda-package/
+.zappa_settings.json
+
+# === AI tooling outputs ===
+.claude/
+.aider.*
+.cursor/

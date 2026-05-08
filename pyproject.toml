@@ -1,0 +1,251 @@
+# =============================================================================
+# ClinTrial-Stream — Python project configuration
+# =============================================================================
+# This file replaces setup.py, setup.cfg, requirements.txt, pytest.ini, mypy.ini,
+# and .flake8. PEP 621 standard, single source of truth.
+
+[build-system]
+requires = ["hatchling>=1.21"]
+build-backend = "hatchling.build"
+
+# -----------------------------------------------------------------------------
+# Project metadata (PEP 621)
+# -----------------------------------------------------------------------------
+[project]
+name = "clintrial-stream"
+version = "0.1.0"
+description = "Real-time clinical trial event streaming platform on AWS"
+readme = "README.md"
+requires-python = ">=3.12"
+license = { text = "MIT" }
+authors = [
+  { name = "Gbade Odimayo", email = "oluwagbadeodimayo@gmail.com" },
+]
+keywords = [
+  "aws",
+  "kinesis",
+  "dynamodb",
+  "flask",
+  "clinical-trial",
+  "streaming",
+  "data-engineering",
+]
+classifiers = [
+  "Development Status :: 3 - Alpha",
+  "Intended Audience :: Developers",
+  "License :: OSI Approved :: MIT License",
+  "Operating System :: POSIX :: Linux",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.12",
+  "Topic :: Scientific/Engineering :: Bio-Informatics",
+  "Topic :: Software Development :: Libraries :: Python Modules",
+]
+
+# -----------------------------------------------------------------------------
+# Runtime dependencies
+# -----------------------------------------------------------------------------
+# Pinned with `>=` lower bounds and `<` upper bounds for major versions.
+# This balances reproducibility (we know minimum versions) with flexibility
+# (security patches in minor/patch versions are picked up automatically).
+dependencies = [
+  # --- AWS SDK ---
+  "boto3>=1.34,<2.0",                  # AWS service client
+  "botocore>=1.34,<2.0",               # boto3 internals (pinned for compat)
+
+  # --- Web framework ---
+  "Flask>=3.0,<4.0",                   # API framework (chosen over FastAPI for JD alignment)
+  "Flask-RESTful>=0.3.10,<0.4",        # Resource-based routing
+  "Flask-Cors>=4.0,<5.0",              # CORS handling
+  "gunicorn>=21.2,<23.0",              # Production WSGI server
+
+  # --- Validation and config ---
+  "pydantic>=2.6,<3.0",                # Domain models, request/response validation
+  "pydantic-settings>=2.2,<3.0",       # 12-factor config from env vars
+
+  # --- Auth ---
+  "PyJWT[crypto]>=2.8,<3.0",           # JWT verification for Cognito tokens
+  "cryptography>=42.0,<46.0",          # PyJWT crypto backend
+
+  # --- Observability ---
+  "structlog>=24.1,<26.0",             # Structured logging (JSON output)
+  "aws-lambda-powertools>=2.34,<4.0",  # Lambda observability (logger, metrics, tracer)
+
+  # --- Utilities ---
+  "python-dateutil>=2.9,<3.0",         # Robust date parsing
+  "tenacity>=8.2,<10.0",               # Retry with exponential backoff
+]
+
+# -----------------------------------------------------------------------------
+# Optional dependency groups (pip install -e ".[dev]")
+# -----------------------------------------------------------------------------
+[project.optional-dependencies]
+dev = [
+  # --- Test runner ---
+  "pytest>=8.0,<9.0",
+  "pytest-cov>=4.1,<7.0",              # Coverage measurement
+  "pytest-asyncio>=0.23,<2.0",         # Async test support
+  "pytest-mock>=3.12,<4.0",            # Mocker fixture
+  "pytest-timeout>=2.2,<3.0",          # Kill hung tests
+
+  # --- AWS test doubles ---
+  "moto[all]>=5.0,<6.0",               # Mock AWS services in unit tests
+  "boto3-stubs[essential,kinesis,dynamodb,sns,cognito-idp,s3]>=1.34,<2.0",
+
+  # --- Lint, format, type check ---
+  "ruff>=0.4,<1.0",                    # Linter + formatter (replaces flake8/black/isort)
+  "mypy>=1.9,<2.0",                    # Static type checker
+
+  # --- Pre-commit hooks ---
+  "pre-commit>=3.6,<5.0",
+
+  # --- Security ---
+  "detect-secrets>=1.4,<2.0",          # Secret scanning in pre-commit
+
+  # --- Local dev tools ---
+  "ipython>=8.20,<10.0",               # Better REPL
+  "rich>=13.7,<15.0",                  # Pretty terminal output for demo scripts
+]
+
+[project.urls]
+Homepage = "https://github.com/gbadedata/clintrial-stream"
+Repository = "https://github.com/gbadedata/clintrial-stream"
+Issues = "https://github.com/gbadedata/clintrial-stream/issues"
+
+# -----------------------------------------------------------------------------
+# Console scripts (CLI entrypoints)
+# -----------------------------------------------------------------------------
+[project.scripts]
+clintrial-producer = "clintrial.producer.cli:main"
+clintrial-api = "clintrial.api.cli:main"
+
+# -----------------------------------------------------------------------------
+# Hatchling: where the package source lives (src/ layout)
+# -----------------------------------------------------------------------------
+[tool.hatch.build.targets.wheel]
+packages = ["src/clintrial"]
+
+# -----------------------------------------------------------------------------
+# Ruff (linter + formatter)
+# -----------------------------------------------------------------------------
+# Ruff is the modern replacement for flake8 + black + isort + pyupgrade.
+# Single Rust binary. ~100x faster than running them separately.
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+src = ["src", "tests"]
+extend-exclude = [
+  ".venv",
+  "infra/terraform/.terraform",
+  "build",
+  "dist",
+]
+
+[tool.ruff.lint]
+# Rule set: pycodestyle + pyflakes + isort + bugbear + comprehensions +
+# pyupgrade + simplify + bandit (security) + naming
+select = [
+  "E",    # pycodestyle errors
+  "W",    # pycodestyle warnings
+  "F",    # pyflakes
+  "I",    # isort
+  "N",    # pep8-naming
+  "B",    # bugbear
+  "C4",   # comprehensions
+  "UP",   # pyupgrade (modern syntax)
+  "SIM",  # simplify
+  "S",    # bandit (security)
+  "A",    # builtins (don't shadow built-in names)
+  "RUF",  # ruff-specific
+  "T20",  # disallow print() in production code
+  "PT",   # pytest style
+]
+ignore = [
+  "S101",  # `assert` is fine in tests
+  "S311",  # `random` is fine for synthetic test data (we don't use it for crypto)
+]
+
+[tool.ruff.lint.per-file-ignores]
+# Tests can use assert and have longer lines without complaint
+"tests/**/*.py" = ["S101", "PT011", "S311"]
+# Scripts can use print
+"scripts/**/*.py" = ["T20"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+docstring-code-format = true
+docstring-code-line-length = 80
+
+# -----------------------------------------------------------------------------
+# Mypy (type checker) — strict mode
+# -----------------------------------------------------------------------------
+[tool.mypy]
+python_version = "3.12"
+strict = true
+warn_unused_configs = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+no_implicit_reexport = true
+show_error_codes = true
+show_column_numbers = true
+pretty = true
+
+# Files mypy should check
+files = ["src", "tests"]
+
+# Some third-party libs have no type stubs — silence those imports
+[[tool.mypy.overrides]]
+module = [
+  "moto.*",
+  "tenacity.*",
+]
+ignore_missing_imports = true
+
+# -----------------------------------------------------------------------------
+# Pytest
+# -----------------------------------------------------------------------------
+[tool.pytest.ini_options]
+minversion = "8.0"
+testpaths = ["tests"]
+addopts = [
+  "-ra",                               # short summary of skipped/failed
+  "--strict-markers",                  # error on undeclared markers
+  "--strict-config",                   # error on bad config
+  "--cov=clintrial",
+  "--cov-report=term-missing",
+  "--cov-report=xml",
+  "--cov-fail-under=70",               # fail CI if coverage drops below 70%
+  "-vv",
+]
+markers = [
+  "unit: pure logic tests (no AWS, no network)",
+  "integration: tests against LocalStack or moto",
+  "slow: tests that take more than 1 second",
+]
+asyncio_mode = "auto"
+filterwarnings = [
+  "error",
+  "ignore::DeprecationWarning:botocore.*",
+]
+
+# -----------------------------------------------------------------------------
+# Coverage
+# -----------------------------------------------------------------------------
+[tool.coverage.run]
+branch = true
+source = ["src/clintrial"]
+omit = [
+  "*/cli.py",                          # CLI wrappers tested via integration
+  "*/__main__.py",
+]
+
+[tool.coverage.report]
+exclude_lines = [
+  "pragma: no cover",
+  "raise NotImplementedError",
+  "if __name__ == .__main__.:",
+  "if TYPE_CHECKING:",
+  "@(abc\\.)?abstractmethod",
+]
+show_missing = true
+skip_covered = false
