@@ -1,0 +1,17 @@
+# =============================================================================
+# infra/terraform/modules/kinesis-stream/versions.tf
+# =============================================================================
+# Provider version requirements for this module.
+# Modules declare their compatibility, the calling environment supplies the
+# actual provider configuration.
+
+terraform {
+  required_version = ">= 1.9.0, < 2.0.0"
+
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = ">= 5.50.0, < 6.0.0"
+    }
+  }
+}
