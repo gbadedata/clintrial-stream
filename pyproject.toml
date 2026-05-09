@@ -193,14 +193,6 @@ pretty = true
 # Files mypy should check
 files = ["src", "tests"]
 
-# Some third-party libs have no type stubs — silence those imports
-[[tool.mypy.overrides]]
-module = [
-  "moto.*",
-  "tenacity.*",
-]
-ignore_missing_imports = true
-
 # -----------------------------------------------------------------------------
 # Pytest
 # -----------------------------------------------------------------------------
