@@ -117,10 +117,10 @@ def configure_logging(*, json_output: bool = True) -> None:
         level=log_level,
     )
 
-    # The processor pipeline: each function transforms the event_dict in turn
+    # The processor pipeline: each function transforms the event_dict in turn.
+    # Level filtering is handled by make_filtering_bound_logger below, not here,
+    # because filter_by_level requires stdlib logger internals and we use PrintLogger.
     shared_processors: list[Processor] = [
-        # Filter by level early — cheaper than later
-        structlog.stdlib.filter_by_level,
         # Add timestamp in ISO 8601 / UTC
         structlog.processors.TimeStamper(fmt="iso", utc=True),
         # Add the calling module/function for traceability

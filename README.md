@@ -17,7 +17,7 @@ A production-shaped data engineering project that ingests, processes, and querie
 [Quickstart](#quickstart) ·
 [Features](#features) ·
 [ADRs](docs/adr/) ·
-[Demo video](#demo)
+[Demo](#demo)
 
 </div>
 
@@ -42,7 +42,7 @@ ClinTrial-Stream demonstrates all of those simultaneously, in the specific domai
 
 ## Architecture
 
-```
+```text
 ┌──────────────┐     ┌──────────────┐     ┌──────────────────┐
 │  Trial site  │────▶│   Kinesis    │────▶│  Hot consumer    │──▶ DynamoDB
 │   producer   │     │   (2 shards) │     │  (Lambda)        │   (state)
@@ -81,14 +81,34 @@ See [`docs/architecture/`](docs/architecture/) for detailed diagrams and [`docs/
 
 ## Demo
 
-A 3-minute video walkthrough is available [here](#) <!-- TODO: link demo video --> showing:
+The producer streams synthetic clinical trial events at a configurable rate to the live Kinesis stream. A 100-event run at 10 events/second:
 
-1. `terraform apply` provisioning the platform from scratch
-2. The producer firing 1,000 synthetic adverse events into Kinesis
-3. CloudWatch metrics updating in real-time
-4. A safety alarm triggering on a "serious" severity event
-5. The Flask API returning patient state and event history
-6. `terraform destroy` cleaning up
+```bash
+python -m clintrial.producer.cli --total 100 --rate 10 --console-logs
+```
+
+![Producer run output](assets/screenshots/02-producer-run.png)
+
+Each batch is sent via `PutRecords` (up to 500 records per AWS API call) with tenacity-driven retries on partial failure. Events are partitioned by `patient_id` so a patient's history stays in one shard — the right ordering guarantee for clinical data.
+
+### End-to-end roundtrip
+
+Reading a single event back from Kinesis confirms the full pipeline works — domain model → Pydantic JSON → `PutRecords` → Kinesis (KMS-encrypted) → `GetRecords` → base64 decode → original event:
+
+![Roundtripped event](assets/screenshots/03-event-roundtrip.png)
+
+The decoded event is a real, regulator-shaped adverse event report:
+
+- `event_id` is a sortable ULID
+- `correlation_id` traces the request across logs
+- `study_id` follows the ClinicalTrials.gov format (`NCT........`)
+- `severity` is a CTCAE v5.0 grade
+- `preferred_term` is a real MedDRA-style adverse event name
+- Timestamps are ISO-8601 in UTC
+- `outcome` follows ICH E2B(R3) reporting conventions
+- Domain validators ensure `resolution_date >= onset_date`, serious AEs declare a criterion, grade-5 events have `outcome=fatal`
+
+See [docs/runbooks/producer-demo.md](docs/runbooks/producer-demo.md) for the full runbook including verification queries and CloudWatch metric extraction.
 
 ## Quickstart
 
@@ -239,7 +259,7 @@ make cost   # current month's spend by service
 
 ## Project structure
 
-```
+```text
 clintrial-stream/
 ├── .github/                    # GitHub Actions, issue templates
 │   └── workflows/

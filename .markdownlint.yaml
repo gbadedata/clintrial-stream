@@ -16,3 +16,6 @@ MD024:
 
 # Allow first line not to be H1 (some files start with badges or front-matter)
 MD041: false
+
+# MD036: bold-as-heading false positives on README tagline
+MD036: false
