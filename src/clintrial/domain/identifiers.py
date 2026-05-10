@@ -40,7 +40,6 @@ CorrelationId = NewType("CorrelationId", str)
 EventId = NewType("EventId", str)
 """Identifier for a single trial event."""
 
-
 # -----------------------------------------------------------------------------
 # ID generators
 # -----------------------------------------------------------------------------

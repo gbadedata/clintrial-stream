@@ -25,20 +25,14 @@ A production-shaped data engineering project that ingests, processes, and querie
 
 ## What this is
 
-ClinTrial-Stream is a streaming data platform that simulates how a real biotech company processes telemetry from clinical trial sites worldwide. Trial sites emit events continuously — a patient enrolls, an adverse event is reported, lab results arrive. These events have to be:
+ClinTrial-Stream is a streaming data platform that processes telemetry from clinical trial sites. Trial sites emit events continuously — a patient enrolls, an adverse event is reported, lab results arrive. These events have to be:
 
-1. **Ingested at scale** — thousands of events per second from hundreds of sites
-2. **Processed in near-real-time** — adverse events of high severity must trigger safety alarms within seconds, not hours
-3. **Queryable through an API** — trial coordinators need to look up patient state, recent events, and safety summaries on demand
-4. **Preserved immutably** — every event must be archived for FDA audit (21 CFR Part 11 compliance)
+1. **Ingested at scale** - thousands of events per second from many sites concurrently
+2. **Validated against domain rules** - adverse events must follow ICH E2B(R3); a serious AE must declare a seriousness criterion; resolution dates can't precede onset dates
+3. **Made queryable in two ways** - sub-100ms reads for an interactive dashboard (DynamoDB), and ad-hoc analytical queries over the historical archive (Athena over Parquet in S3)
+4. **Observable end-to-end** - every event traceable through the pipeline by correlation ID, with CloudWatch metrics on throughput, latency, and quality
 
-This is a portfolio project, not a production system, but every architectural decision matches what a production system would do. It is structured to be cloned, deployed in 15 minutes, and torn down in 5. Cost while running: about £0.50 per day.
-
-## Why I built this
-
-I am applying for data engineering roles in Cambridge biotech. Job descriptions in the cluster (AstraZeneca, Illumina, Abcam, BenevolentAI, etc.) consistently ask for: streaming ingestion, AWS or GCP cloud-native architecture, Python, SQL, Flask/Django, container orchestration, Infrastructure as Code, and stakeholder-facing API design.
-
-ClinTrial-Stream demonstrates all of those simultaneously, in the specific domain (clinical trials, regulatory data) where the work happens.
+The platform is built around real biotech standards: **ICH E2B(R3)** for adverse-event reporting, **CTCAE v5.0** for severity grading, **MedDRA**-style preferred terms, **CDISC SDTM** domain conventions for enrollment and lab data, and **ClinicalTrials.gov** identifiers for studies.
 
 ## Architecture
 
@@ -340,25 +334,6 @@ For now, deployment is manual via `make tf-apply`. Phase 2 of this project adds:
 - Blue/green Lambda deployment using AWS CodeDeploy
 - Automated rollback on CloudWatch alarm trigger
 
-## Cost
-
-Estimated AWS cost while running, in eu-west-2:
-
-| Resource | Monthly cost |
-|---|---|
-| Kinesis Data Streams (2 shards, 24h retention) | $22.50 |
-| Lambda (1M invocations, 128 MB) | $0.20 |
-| DynamoDB (on-demand, ~10k requests) | $0.50 |
-| S3 (audit bucket, ~1 GB) | $0.03 |
-| CloudWatch Logs (7-day retention) | $0.50 |
-| Cognito (50,000 free MAU) | $0.00 |
-| **Total (running 24/7)** | **~$24/month** |
-| **Total (typical demo: 2 hours)** | **~$0.07** |
-
-The platform is **designed to be torn down between demos**. `make tf-destroy` removes everything in 5 minutes. The CloudWatch billing alarm at $10/month catches any forgotten resources within 6 hours.
-
-See [`make cost`](Makefile) for live cost reporting.
-
 ## Architecture decision records
 
 Each ADR documents a single architectural decision, the alternatives considered, and the reasoning. Read them when you want to understand *why* the platform looks the way it does.
@@ -372,21 +347,18 @@ Each ADR documents a single architectural decision, the alternatives considered,
 | [ADR-005](docs/adr/005-cognito-for-auth.md) | Cognito for OAuth2/JWT auth |
 | [ADR-006](docs/adr/006-multi-cloud-portability.md) | Designed for AWS+GCP portability |
 
-## Background
-
-This is **Project 1 of 3** in a larger biotech-data-engineering portfolio:
-
-1. **ClinTrial-Stream** *(this repo)* — Real-time clinical trial events on AWS (Kinesis, DynamoDB, Flask, Cognito)
-2. **GenomeVault** — Genomic variant warehouse on GCP (BigQuery, Dataflow, Django, Looker)
-3. **BioAuth-Mesh** — Multi-cloud platform with Kubernetes service mesh and OIDC federation
-
-Together they cover every requirement of a senior data engineer JD in Cambridge biotech: streaming, batch, NoSQL, SQL, BigQuery, AWS, GCP, Python, Flask, Django, Terraform, Docker, Kubernetes, OAuth/OIDC, and bioinformatics domain depth.
-
 ## Author
 
 **Gbade Odimayo**
-Data Engineer · Cambridge UK
 [gbadedata.com](https://gbadedata.com) · [GitHub](https://github.com/gbadedata) · [LinkedIn](https://linkedin.com/in/gbadedata)
+
+## Why I built this
+
+I built ClinTrial-Stream because I wanted a project where the architecture had to take regulated-industry constraints seriously, not just chase fashion. Clinical trial data is interesting precisely because the rules are non-negotiable — an adverse event has a specific shape, a fatal outcome has a specific reporting cascade, and a missing dimension on a record can stall a regulatory submission. That makes it a great forcing function for thinking about validation, idempotency, ordering, and audit, in a way that "another todo app" simply doesn't.
+
+The other reason is that streaming systems get talked about more than they get built end-to-end. There's a meaningful gap between "I know what Kinesis is" and "I have shipped a producer that batches `PutRecords` correctly, retries on partial failures, partitions by an entity key to preserve ordering, and emits CloudWatch metrics through EMF." This project closes that gap for me.
+
+Issues, questions, or improvements: [open an issue](https://github.com/gbadedata/clintrial-stream/issues) or send a pull request.
 
 ## License
 

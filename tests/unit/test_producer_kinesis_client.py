@@ -27,7 +27,6 @@ from clintrial.producer.kinesis_client import KinesisProducer
 
 pytestmark = pytest.mark.unit
 
-
 # -----------------------------------------------------------------------------
 # Fixtures
 # -----------------------------------------------------------------------------

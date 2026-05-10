@@ -13,7 +13,6 @@ from clintrial.domain.identifiers import (
 
 pytestmark = pytest.mark.unit
 
-
 # Crockford Base32: digits + letters minus I, L, O, U
 _CROCKFORD_PATTERN = re.compile(r"^[0-9A-HJKMNP-TV-Z]{26}$")
 

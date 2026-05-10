@@ -52,7 +52,6 @@ SAMPLE_STUDIES: list[StudyId] = [
 SAMPLE_SITES: list[SiteId] = [
     SiteId("SITE-LON-001"),  # London
     SiteId("SITE-LON-002"),
-    SiteId("SITE-CAM-001"),  # Cambridge
     SiteId("SITE-EDI-001"),  # Edinburgh
     SiteId("SITE-MAN-001"),  # Manchester
     SiteId("SITE-DUB-001"),  # Dublin
@@ -109,7 +108,6 @@ ANALYTE_RANGES: dict[LabAnalyte, tuple[Decimal, Decimal, str]] = {
     LabAnalyte.SODIUM: (Decimal("135"), Decimal("145"), "mmol/L"),
     LabAnalyte.POTASSIUM: (Decimal("3.5"), Decimal("5.0"), "mmol/L"),
 }
-
 
 # =============================================================================
 # Generator
