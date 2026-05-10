@@ -4,7 +4,7 @@
 
 **Real-time clinical trial event streaming platform on AWS**
 
-A production-shaped data engineering project that ingests, processes, and queries adverse events, enrollment changes, and lab results from clinical trial sites — at sub-second latency, with regulatory-grade audit trails.
+A production-shaped data engineering project that ingests, processes, and queries adverse events, enrollment changes, and lab results from clinical trial sites - at sub-second latency, with regulatory-grade audit trails.
 
 [![CI](https://github.com/gbadedata/clintrial-stream/actions/workflows/ci.yml/badge.svg)](https://github.com/gbadedata/clintrial-stream/actions/workflows/ci.yml)
 [![Python 3.12](https://img.shields.io/badge/python-3.12-blue.svg)](https://www.python.org/downloads/release/python-3120/)
@@ -25,7 +25,7 @@ A production-shaped data engineering project that ingests, processes, and querie
 
 ## What this is
 
-ClinTrial-Stream is a streaming data platform that processes telemetry from clinical trial sites. Trial sites emit events continuously — a patient enrolls, an adverse event is reported, lab results arrive. These events have to be:
+ClinTrial-Stream is a streaming data platform that processes telemetry from clinical trial sites. Trial sites emit events continuously - a patient enrolls, an adverse event is reported, lab results arrive. These events have to be:
 
 1. **Ingested at scale** - thousands of events per second from many sites concurrently
 2. **Validated against domain rules** - adverse events must follow ICH E2B(R3); a serious AE must declare a seriousness criterion; resolution dates can't precede onset dates
@@ -347,14 +347,9 @@ Each ADR documents a single architectural decision, the alternatives considered,
 | [ADR-005](docs/adr/005-cognito-for-auth.md) | Cognito for OAuth2/JWT auth |
 | [ADR-006](docs/adr/006-multi-cloud-portability.md) | Designed for AWS+GCP portability |
 
-## Author
-
-**Gbade Odimayo**
-[gbadedata.com](https://gbadedata.com) · [GitHub](https://github.com/gbadedata) · [LinkedIn](https://linkedin.com/in/gbadedata)
-
 ## Why I built this
 
-I built ClinTrial-Stream because I wanted a project where the architecture had to take regulated-industry constraints seriously, not just chase fashion. Clinical trial data is interesting precisely because the rules are non-negotiable — an adverse event has a specific shape, a fatal outcome has a specific reporting cascade, and a missing dimension on a record can stall a regulatory submission. That makes it a great forcing function for thinking about validation, idempotency, ordering, and audit, in a way that "another todo app" simply doesn't.
+I built ClinTrial-Stream because I wanted a project where the architecture had to take regulated-industry constraints seriously, not just chase fashion. Clinical trial data is interesting precisely because the rules are non-negotiable - an adverse event has a specific shape, a fatal outcome has a specific reporting cascade, and a missing dimension on a record can stall a regulatory submission. That makes it a great forcing function for thinking about validation, idempotency, ordering, and audit, in a way that "another todo app" simply doesn't.
 
 The other reason is that streaming systems get talked about more than they get built end-to-end. There's a meaningful gap between "I know what Kinesis is" and "I have shipped a producer that batches `PutRecords` correctly, retries on partial failures, partitions by an entity key to preserve ordering, and emits CloudWatch metrics through EMF." This project closes that gap for me.
 
@@ -362,4 +357,4 @@ Issues, questions, or improvements: [open an issue](https://github.com/gbadedata
 
 ## License
 
-[MIT](LICENSE) — use, modify, and distribute freely. If you find it useful, a star on GitHub is appreciated.
+[MIT](LICENSE) - use, modify, and distribute freely. If you find it useful, a star on GitHub is appreciated.
